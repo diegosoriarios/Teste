@@ -8,13 +8,22 @@
 <body>
     <div>
         <p id="teste">Teste</p>
+        <div style="margin-top:12px;">
+            <button id="openInAppBtn" style="padding:8px 12px;">Open in app</button>
+            <div id="status" style="margin-top:8px;color:#555;"></div>
+        </div>
     </div>
     <script>
-        if(window.ReactNativeWebView) {
-            // send data object to React Native (only string)
-            window.ReactNativeWebView.postMessage(JSON.stringify(dataObject))
-            addUrlText();
-            redirectToSeedrsScheme();
+        // If running inside a Re
+        // https://eu-cggg4.r-eng.app/users/john-doeact Native WebView, send a simple heartbeat
+        if (window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function') {
+            try {
+                window.ReactNativeWebView.postMessage(
+                    JSON.stringify({ type: 'PAGE_INFO', url: window.location.href })
+                );
+            } catch (e) {
+                // ignore
+            }
         }
 
         function addUrlText() {
@@ -23,9 +32,67 @@
         }
         addUrlText();
 
-        function redirectToSeedrsScheme() {
-            window.location.href = "seedrs://welcome";
+        // Configure your app link details here
+        const APP_SCHEME = 'seedrs://welcome'; // replace with your scheme route
+        const ANDROID_PACKAGE = 'com.seedrs.seedrs-mobile'; // replace with your package
+        const IOS_APP_STORE_URL = 'https://apps.apple.com/app/id0000000000'; // replace with your App Store URL
+        const ANDROID_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.example.app'; // replace with your Play Store URL
+
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
+
+        function isAndroid() {
+            return /Android/.test(navigator.userAgent);
+        }
+
+        function openApp() {
+            const status = document.getElementById('status');
+            status.textContent = 'Attempting to open the app…';
+
+            const start = Date.now();
+
+            if (isAndroid()) {
+                // Prefer intent syntax for Android with fallback to Play Store
+                const intentUrl = `intent://welcome#Intent;scheme=${encodeURIComponent('seedrs')};package=${encodeURIComponent(ANDROID_PACKAGE)};S.browser_fallback_url=${encodeURIComponent(ANDROID_PLAY_URL)};end`;
+                window.location.href = intentUrl;
+                // No reliable on-page detection; show a gentle note
+                setTimeout(() => { status.textContent = 'If nothing happened, install or open from the Play Store.'; }, 1200);
+                return;
+            }
+
+            if (isIOS()) {
+                // iOS: try scheme, then fallback to App Store after a short delay
+                const timeout = setTimeout(() => {
+                    const elapsed = Date.now() - start;
+                    // If still here after ~1s, likely not installed
+                    if (elapsed < 1600) {
+                        window.location.href = IOS_APP_STORE_URL;
+                    }
+                }, 1200);
+
+                // Some iOS versions require direct assignment (not window.open)
+                window.location.href = APP_SCHEME;
+
+                // Clear timeout if page visibility changes (app opened)
+                const onHide = () => { clearTimeout(timeout); document.removeEventListener('visibilitychange', onHide); };
+                document.addEventListener('visibilitychange', onHide);
+                return;
+            }
+
+            // Desktop or unknown: just show the raw link
+            status.innerHTML = `Unsupported device in browser. Try this link: <a href="${APP_SCHEME}">${APP_SCHEME}</a>`;
+        }
+
+        document.getElementById('openInAppBtn')?.addEventListener('click', openApp);
+
+        // Optional: auto-open if query param ?openInApp=1 is present
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('openInApp') === '1') {
+                openApp();
+            }
+        } catch (_) {}
     </script>
 </body>
 </html>
