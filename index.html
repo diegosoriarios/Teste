@@ -34,7 +34,9 @@
         addUrlText();
 
         // Configure your app link details here
-        const APP_SCHEME = 'seedrs://welcome'; // replace with your scheme route
+        const token = new URL(window.location.href).searchParams.get('code');
+        const state = new URL(window.location.href).searchParams.get('state');
+        const APP_SCHEME = 'seedrs://welcome/' + token; // replace with your scheme route
         const ANDROID_PACKAGE = 'com.seedrs.seedrs-mobile'; // replace with your package
         const IOS_APP_STORE_URL = 'https://apps.apple.com/app/id0000000000'; // replace with your App Store URL
         const ANDROID_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.example.app'; // replace with your Play Store URL
