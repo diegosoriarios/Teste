@@ -10,6 +10,7 @@
         <p id="teste">Teste</p>
         <div style="margin-top:12px;">
             <button id="openInAppBtn" style="padding:8px 12px;">Open in app</button>
+            <button id="redirectToPage" style="padding:8px 12px;">Redirect to Page</button>
             <div id="status" style="margin-top:8px;color:#555;"></div>
         </div>
     </div>
@@ -93,6 +94,14 @@
                 openApp();
             }
         } catch (_) {}
+
+        function redirectToPage() {
+            const token = new URL(window.location.href).searchParams.get('code');
+            const state = new URL(window.location.href).searchParams.get('state');
+            setTimeout(() => {
+                window.location.href = `https://eu-cggg4.r-eng.app/users/john-doe?code=${token}&state=${state}`;
+            }, 3000);
+        }
     </script>
 </body>
 </html>
