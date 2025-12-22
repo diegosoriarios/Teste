@@ -7,10 +7,8 @@
 </head>
 <body>
     <div>
-        <p id="teste">Teste</p>
         <div style="margin-top:12px;">
-            <button id="openInAppBtn" style="padding:8px 12px;">Open in app</button>
-            <button id="redirectToPage" style="padding:8px 12px;">Redirect to Page</button>
+            <button id="openInAppBtn" style="padding:8px 12px;">Go back to the app</button>
             <div id="status" style="margin-top:8px;color:#555;"></div>
         </div>
     </div>
@@ -39,7 +37,7 @@
         const APP_SCHEME = 'seedrs://welcome/' + token; // replace with your scheme route
         const ANDROID_PACKAGE = 'com.seedrs.seedrs-mobile'; // replace with your package
         const IOS_APP_STORE_URL = 'https://apps.apple.com/app/id0000000000'; // replace with your App Store URL
-        const ANDROID_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.example.app'; // replace with your Play Store URL
+        const ANDROID_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.seedrs.seedrs-mobile'; // replace with your Play Store URL
 
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -97,13 +95,6 @@
             }
         } catch (_) {}
 
-        function redirectToPage() {
-            const token = new URL(window.location.href).searchParams.get('code');
-            const state = new URL(window.location.href).searchParams.get('state');
-            setTimeout(() => {
-                window.location.href = `https://eu-cggg4.r-eng.app/users/john-doe?code=${token}&state=${state}`;
-            }, 3000);
-        }
     </script>
 </body>
 </html>
