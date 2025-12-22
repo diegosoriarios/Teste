@@ -34,7 +34,8 @@
         // Configure your app link details here
         const token = new URL(window.location.href).searchParams.get('code');
         const state = new URL(window.location.href).searchParams.get('state');
-        const APP_SCHEME = 'seedrs://welcome/' + token; // replace with your scheme route
+        const APP_HOST = 'welcome';
+        const APP_SCHEME_URL = token ? `seedrs://${APP_HOST}/${encodeURIComponent(token)}` : `seedrs://${APP_HOST}`; // custom scheme
         const ANDROID_PACKAGE = 'com.seedrs.seedrs-mobile'; // replace with your package
         const IOS_APP_STORE_URL = 'https://apps.apple.com/app/id0000000000'; // replace with your App Store URL
         const ANDROID_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.seedrs.seedrs-mobile'; // replace with your Play Store URL
@@ -54,12 +55,21 @@
             const start = Date.now();
 
             if (isAndroid()) {
-                // Prefer intent syntax for Android with fallback to Play Store
-                const PATH = token ? `welcome/${encodeURIComponent(token)}` : 'welcome';
+                // Try direct custom scheme first (often works in Chrome)
+                try {
+                    window.location.href = APP_SCHEME_URL;
+                } catch (_) {}
+
+                // Fallback to intent syntax for Android with Play Store fallback
+                const PATH = token ? `${APP_HOST}/${encodeURIComponent(token)}` : APP_HOST;
                 const intentUrl = `intent://${PATH}#Intent;scheme=${encodeURIComponent('seedrs')};package=${encodeURIComponent(ANDROID_PACKAGE)};S.browser_fallback_url=${encodeURIComponent(ANDROID_PLAY_URL)};end`;
-                window.location.href = intentUrl;
+
+                setTimeout(() => {
+                    // If the app didn't open, try intent (Chrome handoff)
+                    try { window.location.href = intentUrl; } catch (_) {}
+                    status.textContent = 'If nothing happened, install or open from the Play Store.';
+                }, 800);
                 // No reliable on-page detection; show a gentle note
-                setTimeout(() => { status.textContent = 'If nothing happened, install or open from the Play Store.'; }, 1200);
                 return;
             }
 
@@ -74,7 +84,7 @@
                 }, 1200);
 
                 // Some iOS versions require direct assignment (not window.open)
-                window.location.href = APP_SCHEME;
+                window.location.href = APP_SCHEME_URL;
 
                 // Clear timeout if page visibility changes (app opened)
                 const onHide = () => { clearTimeout(timeout); document.removeEventListener('visibilitychange', onHide); };
