@@ -14,8 +14,7 @@
         </div>
     </div>
     <script>
-        // If running inside a Re
-        // https://eu-cggg4.r-eng.app/users/john-doeact Native WebView, send a simple heartbeat
+        // If running inside a React Native WebView, send a simple heartbeat
         if (window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function') {
             try {
                 window.ReactNativeWebView.postMessage(
@@ -56,7 +55,8 @@
 
             if (isAndroid()) {
                 // Prefer intent syntax for Android with fallback to Play Store
-                const intentUrl = `intent://welcome#Intent;scheme=${encodeURIComponent('seedrs')};package=${encodeURIComponent(ANDROID_PACKAGE)};S.browser_fallback_url=${encodeURIComponent(ANDROID_PLAY_URL)};end`;
+                const PATH = token ? `welcome/${encodeURIComponent(token)}` : 'welcome';
+                const intentUrl = `intent://${PATH}#Intent;scheme=${encodeURIComponent('seedrs')};package=${encodeURIComponent(ANDROID_PACKAGE)};S.browser_fallback_url=${encodeURIComponent(ANDROID_PLAY_URL)};end`;
                 window.location.href = intentUrl;
                 // No reliable on-page detection; show a gentle note
                 setTimeout(() => { status.textContent = 'If nothing happened, install or open from the Play Store.'; }, 1200);
